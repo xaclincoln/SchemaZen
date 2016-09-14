@@ -7,7 +7,9 @@ using System.Linq;
 namespace SchemaZen.Library.Command {
     public class ScriptCommand : BaseCommand {
 
-        public void Execute(Dictionary<string, string> namesAndSchemas, string dataTablesPattern, 
+        public void Execute(
+            Dictionary<string, string> namesAndSchemas, 
+            string dataTablesPattern, string tablesPattern, 
             string tableHint, List<string> filteredTypes)
         {
             if (!Overwrite && Directory.Exists(ScriptDir)) {
@@ -34,9 +36,22 @@ namespace SchemaZen.Library.Command {
                 }
             }
 
-            db.ScriptToDir(tableHint, Logger.Log);
+            if (!string.IsNullOrEmpty(tablesPattern))
+            {
+                db.Tables = db.FindTablesRegEx(tablesPattern);
+            }
 
-            Logger.Log(TraceLevel.Info, Environment.NewLine + "Snapshot successfully created at " + db.Dir);
+            if(!string.IsNullOrEmpty(ScriptDir))
+            {
+                db.ScriptToDir(tableHint, Logger.Log);
+            }
+            if (!string.IsNullOrEmpty(ScriptFile))
+            {
+                db.ScriptToFile(tableHint, Logger.Log);
+            }
+
+            var destination = string.IsNullOrEmpty(db.Dir) ? db.File : db.Dir;
+            Logger.Log(TraceLevel.Info, Environment.NewLine + "Snapshot successfully created at " + destination);
             var routinesWithWarnings = db.Routines.Select(r => new {
                 Routine = r,
                 Warnings = r.Warnings().ToList()

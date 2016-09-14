@@ -11,6 +11,7 @@ namespace SchemaZen.Library.Command {
         public string User { get; set; }
         public string Pass { get; set; }
         public string ScriptDir { get; set; }
+        public string ScriptFile { get; set; }
         public ILogger Logger { get; set; }
         public bool Overwrite { get; set; }
 
@@ -30,12 +31,18 @@ namespace SchemaZen.Library.Command {
                 return new Database(filteredTypes)
                 {
                     Connection = ConnectionString,
-                    Dir = ScriptDir
+                    Dir = ScriptDir,
+                    File = ScriptFile,
                 };
             }
             if (string.IsNullOrEmpty(Server) || string.IsNullOrEmpty(DbName))
             {
                 throw new ArgumentException("You must provide a connection string, or a server and database name");
+            }
+
+            if(string.IsNullOrEmpty(ScriptDir) && string.IsNullOrEmpty(ScriptFile))
+            {
+                throw new ArgumentException("You must provide a script directory or a script file");
             }
 
             var builder = new SqlConnectionStringBuilder
@@ -55,7 +62,9 @@ namespace SchemaZen.Library.Command {
             return new Database(filteredTypes)
             {
                 Connection = builder.ToString(),
-                Dir = ScriptDir
+                Dir = ScriptDir,
+                File = ScriptFile,
+                Name=DbName,
             };
         }
 

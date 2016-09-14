@@ -3,7 +3,8 @@ using NDesk.Options;
 
 namespace SchemaZen.console
 {
-    public abstract class BaseCommand : ConsoleCommand {
+    public abstract class BaseCommand : ConsoleCommand
+    {
         protected BaseCommand(string command, string oneLineDescription)
         {
             IsCommand(command, oneLineDescription);
@@ -15,10 +16,16 @@ namespace SchemaZen.console
             HasOption("c|connectionString=", "connection string", o => ConnectionString = o);
             HasOption("u|user=", "user", o => User = o);
             HasOption("p|pass=", "pass", o => Pass = o);
-            HasRequiredOption(
+
+            HasOption(
                 "d|scriptDir=",
                 "Path to database script directory.",
                 o => ScriptDir = o);
+            HasOption(
+                "x|fileName=",
+                "file name to database script directory",
+                o => ScriptFile = o);
+
             HasOption(
                 "o|overwrite=",
                 "Overwrite existing target without prompt.",
@@ -39,6 +46,7 @@ namespace SchemaZen.console
         protected string User { get; set; }
         protected string Pass { get; set; }
         protected string ScriptDir { get; set; }
+        protected string ScriptFile { get; set; }
         protected bool Overwrite { get; set; }
         protected bool Verbose { get; set; }
         protected string DatabaseFilesPath { get; set; }

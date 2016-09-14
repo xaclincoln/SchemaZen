@@ -24,6 +24,11 @@ namespace SchemaZen.console
                 "dataTablesPattern=",
                 "A regular expression pattern that matches tables to export data from.",
                 o => DataTablesPattern = o);
+
+            HasOption(
+                "tablesPattern=",
+                "A regular expression pattern that matches tables to script.",
+                o => TablesPattern = o);
             HasOption(
                 "tableHint=",
                 "Table hint to use when exporting data.",
@@ -38,9 +43,11 @@ namespace SchemaZen.console
         protected string DataTables { get; set; }
         protected string FilterTypes { get; set; }
         protected string DataTablesPattern { get; set; }
+        protected string TablesPattern { get; set; }
         protected string TableHint { get; set; }
 
-        public override int Run(string[] args) {
+        public override int Run(string[] args)
+        {
             _logger = new Logger(Verbose);
 
             if (!Overwrite && Directory.Exists(ScriptDir))
@@ -49,11 +56,13 @@ namespace SchemaZen.console
                     return 1;
             }
 
-            var scriptCommand = new ScriptCommand {
+            var scriptCommand = new ScriptCommand
+            {
                 ConnectionString = ConnectionString,
                 DbName = DbName,
                 Pass = Pass,
                 ScriptDir = ScriptDir,
+                ScriptFile = this.ScriptFile,
                 Server = Server,
                 User = User,
                 Logger = _logger,
@@ -63,10 +72,13 @@ namespace SchemaZen.console
             var filteredTypes = HandleFilteredTypes();
             var namesAndSchemas = HandleDataTables(DataTables);
 
-            try { 
-                scriptCommand.Execute(namesAndSchemas, DataTablesPattern, TableHint, filteredTypes);
-            } catch (Exception ex) {
-		        throw new ConsoleHelpAsException(ex.Message);
+            try
+            {
+                scriptCommand.Execute(namesAndSchemas, DataTablesPattern, TablesPattern, TableHint, filteredTypes);
+            }
+            catch (Exception ex)
+            {
+                throw new ConsoleHelpAsException(ex.Message);
             }
             return 0;
         }
@@ -96,7 +108,8 @@ namespace SchemaZen.console
         private Dictionary<string, string> HandleDataTables(string tableNames)
         {
             var dataTables = new Dictionary<string, string>();
-            if (!string.IsNullOrEmpty(tableNames)) {
+            if (!string.IsNullOrEmpty(tableNames))
+            {
                 foreach (var value in tableNames.Split(','))
                 {
                     var schema = "dbo";
